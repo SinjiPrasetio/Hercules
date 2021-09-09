@@ -2714,6 +2714,8 @@ struct {
 	struct HPMHookPoint *HP_gstorage_init_post;
 	struct HPMHookPoint *HP_gstorage_final_pre;
 	struct HPMHookPoint *HP_gstorage_final_post;
+	struct HPMHookPoint *HP_gstorage_final_sub_pre;
+	struct HPMHookPoint *HP_gstorage_final_sub_post;
 	struct HPMHookPoint *HP_gstorage_delete_pre;
 	struct HPMHookPoint *HP_gstorage_delete_post;
 	struct HPMHookPoint *HP_gstorage_open_pre;
@@ -4162,8 +4164,6 @@ struct {
 	struct HPMHookPoint *HP_mob_name_constants_post;
 	struct HPMHookPoint *HP_mob_mobavail_removal_notice_pre;
 	struct HPMHookPoint *HP_mob_mobavail_removal_notice_post;
-	struct HPMHookPoint *HP_mob_read_randommonster_pre;
-	struct HPMHookPoint *HP_mob_read_randommonster_post;
 	struct HPMHookPoint *HP_mob_parse_row_chatdb_pre;
 	struct HPMHookPoint *HP_mob_parse_row_chatdb_post;
 	struct HPMHookPoint *HP_mob_readchatdb_pre;
@@ -4194,6 +4194,14 @@ struct {
 	struct HPMHookPoint *HP_mob_skill_db_libconfig_sub_post;
 	struct HPMHookPoint *HP_mob_skill_db_libconfig_sub_skill_pre;
 	struct HPMHookPoint *HP_mob_skill_db_libconfig_sub_skill_post;
+	struct HPMHookPoint *HP_mob_read_group_db_pre;
+	struct HPMHookPoint *HP_mob_read_group_db_post;
+	struct HPMHookPoint *HP_mob_read_group_db_libconfig_pre;
+	struct HPMHookPoint *HP_mob_read_group_db_libconfig_post;
+	struct HPMHookPoint *HP_mob_read_group_db_libconfig_sub_pre;
+	struct HPMHookPoint *HP_mob_read_group_db_libconfig_sub_post;
+	struct HPMHookPoint *HP_mob_read_group_db_libconfig_sub_group_pre;
+	struct HPMHookPoint *HP_mob_read_group_db_libconfig_sub_group_post;
 	struct HPMHookPoint *HP_mutex_create_pre;
 	struct HPMHookPoint *HP_mutex_create_post;
 	struct HPMHookPoint *HP_mutex_destroy_pre;
@@ -9823,6 +9831,8 @@ struct {
 	int HP_gstorage_init_post;
 	int HP_gstorage_final_pre;
 	int HP_gstorage_final_post;
+	int HP_gstorage_final_sub_pre;
+	int HP_gstorage_final_sub_post;
 	int HP_gstorage_delete_pre;
 	int HP_gstorage_delete_post;
 	int HP_gstorage_open_pre;
@@ -11271,8 +11281,6 @@ struct {
 	int HP_mob_name_constants_post;
 	int HP_mob_mobavail_removal_notice_pre;
 	int HP_mob_mobavail_removal_notice_post;
-	int HP_mob_read_randommonster_pre;
-	int HP_mob_read_randommonster_post;
 	int HP_mob_parse_row_chatdb_pre;
 	int HP_mob_parse_row_chatdb_post;
 	int HP_mob_readchatdb_pre;
@@ -11303,6 +11311,14 @@ struct {
 	int HP_mob_skill_db_libconfig_sub_post;
 	int HP_mob_skill_db_libconfig_sub_skill_pre;
 	int HP_mob_skill_db_libconfig_sub_skill_post;
+	int HP_mob_read_group_db_pre;
+	int HP_mob_read_group_db_post;
+	int HP_mob_read_group_db_libconfig_pre;
+	int HP_mob_read_group_db_libconfig_post;
+	int HP_mob_read_group_db_libconfig_sub_pre;
+	int HP_mob_read_group_db_libconfig_sub_post;
+	int HP_mob_read_group_db_libconfig_sub_group_pre;
+	int HP_mob_read_group_db_libconfig_sub_group_post;
 	int HP_mutex_create_pre;
 	int HP_mutex_create_post;
 	int HP_mutex_destroy_pre;

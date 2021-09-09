@@ -99,7 +99,7 @@ static const struct {
 	{ HLIF_HEAL, MH_VOLCANIC_ASH },
 	{ MS_BASH, MER_INVINCIBLEOFF2 },
 	{ EL_CIRCLE_OF_FIRE, EL_STONE_RAIN },
-	{ GD_APPROVAL, GD_DEVELOPMENT },
+	{ GD_APPROVAL, GD_GUILD_STORAGE },
 	CUSTOM_SKILL_RANGES
 };
 
@@ -2325,7 +2325,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 					if (!tsc->data[i])
 						continue;
 					if (SC_COMMON_MAX < i) {
-						if (status->get_sc_type(i) & SC_NO_DISPELL)
+						if (status->get_sc_type(i) & SC_BB_NO_RESET)
 							continue;
 					}
 					switch (i) {
@@ -2576,7 +2576,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			rate = rnd() % 1000000;
 			monster = mob->db(class_);
 		} while (
-			(monster->status.mode&(MD_BOSS|MD_PLANT) || monster->summonper[0] <= rate) &&
+			(monster->status.mode&(MD_BOSS|MD_PLANT) || monster->summonper[MOBG_DEAD_BRANCH] <= rate) &&
 			(temp++) < 2000);
 		if (temp < 2000)
 			mob->class_change(dstmd,class_);
@@ -6961,7 +6961,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 					break;
 				}
-				class_ = skill_id == SA_MONOCELL ? MOBID_PORING : mob->get_random_id(4, 1, 0);
+				class_ = skill_id == SA_MONOCELL ? MOBID_PORING : mob->get_random_id(MOBG_CLASS_CHANGE, 1, 0);
 				clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 				mob->class_change(dstmd,class_);
 				if( tsc && dstmd->status.mode&MD_BOSS )
@@ -7362,7 +7362,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 					break;
 				}
-				id = mob->get_random_id(0,0xF, sd->status.base_level);
+				id = mob->get_random_id(MOBG_DEAD_BRANCH, 0xF, sd->status.base_level);
 				if (!id) {
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 					break;
@@ -9543,7 +9543,12 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case LG_EARTHDRIVE:
 			{
 				int splash;
+#if PACKETVER >= 20180207 /// unconfirmed
+				if (skill_id == RK_IGNITIONBREAK)
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+#else
 				clif->skill_damage(src,bl,tick, status_get_amotion(src), 0, -30000, 1, skill_id, skill_lv, BDT_SKILL);
+#endif
 				splash = skill->get_splash(skill_id,skill_lv);
 				if( skill_id == LG_EARTHDRIVE ) {
 					int dummy = 1;
@@ -11329,8 +11334,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			break;
 		default:
-			if (skill->castend_nodamage_id_unknown(src, bl, &skill_id, &skill_lv, &tick, &flag))
+			if (skill->castend_nodamage_id_unknown(src, bl, &skill_id, &skill_lv, &tick, &flag)) {
+				map->freeblock_unlock();
 				return 1;
+			}
 			break;
 	}
 	PRAGMA_GCC46(GCC diagnostic pop)
@@ -11383,7 +11390,6 @@ static bool skill_castend_nodamage_id_unknown(struct block_list *src, struct blo
 	nullpo_retr(true, skill_lv);
 	ShowWarning("skill_castend_nodamage_id: Unknown skill used:%d\n", *skill_id);
 	clif->skill_nodamage(src, bl, *skill_id, *skill_lv, 1);
-	map->freeblock_unlock();
 	return true;
 }
 
@@ -14228,6 +14234,8 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 				if (basestr > 130)
 					basestr = 130;
 				sg->limit -= 1000 * basestr / 20;
+				if (sg->limit < 0)
+					sg->limit = 0;
 				sc_start(ss, bl, SC_VACUUM_EXTREME, 100, sg->skill_lv, sg->limit);
 
 				if ( !map_flag_gvg(bl->m) && !map->list[bl->m].flag.battleground && !is_boss(bl) ) {
@@ -21097,6 +21105,9 @@ static void skill_validate_id(struct config_setting_t *conf, struct s_skill_db *
 	else if (*skill->get_name(id) != '\0')
 		ShowError("%s: Duplicate skill ID %d in entry %d in %s! Skipping skill...\n",
 			  __func__, id, conf_index, conf->file);
+	else if (id >= MAX_SKILL_ID)
+		ShowError("%s: Invalid skill ID %d specified in entry %d in %s! Skill id must be smaller than MAX_SKILL_ID (%d). Skipping skill...\n",
+			  __func__, id, conf_index, conf->file, MAX_SKILL_ID);
 	else
 		sk->nameid = id;
 }

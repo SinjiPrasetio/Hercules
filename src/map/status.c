@@ -5597,7 +5597,7 @@ static unsigned int status_calc_maxhp(struct block_list *bl, struct status_chang
 	if (sc->data[SC_SOLID_SKIN_OPTION])
 		maxhp += 2000; // Fix amount.
 	if (sc->data[SC_POWER_OF_GAIA])
-		maxhp += 3000;
+		maxhp += maxhp * sc->data[SC_POWER_OF_GAIA]->val3 / 100;
 	if (sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 2)
 		maxhp += 500;
 	if (sc->data[SC_MER_HP])
@@ -7690,7 +7690,7 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_M_LIFEPOTION:
 			case SC_G_LIFEPOTION:
 				if (val1 == 0) return 0;
-				// val1 = heal percent/amout
+				// val1 = heal percent/amount
 				// val2 = seconds between heals
 				// val4 = total of heals
 				if (val2 < 1) val2 = 1;
@@ -9015,6 +9015,7 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_ROCK_CRUSHER_ATK:
 			case SC_POWER_OF_GAIA:
 				val2 = 33;
+				val3 = 20; // HP% rate bonus
 				break;
 			case SC_MELON_BOMB:
 			case SC_BANANA_BOMB:
@@ -13571,6 +13572,7 @@ static bool status_read_scdb_libconfig_sub_flag(struct config_setting_t *it, int
 			{ "NoMadoReset", SC_MADO_NO_RESET },
 			{ "NoAllReset", SC_NO_CLEAR },
 			{ "NoBoss", SC_NO_BOSS },
+			{ "NoBBReset", SC_BB_NO_RESET },
 		};
 
 		ARR_FIND(0, ARRAYLENGTH(flags), j, strcmpi(flag, flags[j].name) == 0);
@@ -13585,7 +13587,7 @@ static bool status_read_scdb_libconfig_sub_flag(struct config_setting_t *it, int
 			}
 		} else {
 			if (!status->read_scdb_libconfig_sub_flag_additional(it, type, source))
-				ShowWarning("status_read_scdb_libconfig_sub_flag: invalid flag (%s) for status effect (%d).", flag, type);
+				ShowWarning("status_read_scdb_libconfig_sub_flag: invalid flag (%s) for status effect (%d).\n", flag, type);
 		}
 	}
 	return true;

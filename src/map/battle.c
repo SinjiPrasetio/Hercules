@@ -2679,7 +2679,9 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case GN_CART_TORNADO:
 				{
 					int strbonus = bst->str;
-					skillratio = 50 * skill_lv + (sd ? sd->cart_weight : battle_config.max_cart_weight) / 10 / max(150 - strbonus, 1) + 50 * (sd ? pc->checkskill(sd, GN_REMODELING_CART) : 5);
+					if (strbonus > 130) //Max base stat limit on official is 130. So well allow no higher then 130 STR here. This limit prevents
+						strbonus = 130; //the division from going any lower then 20 so the server wont divide by 0 if someone has 150 STR. [Rytech]
+					skillratio = 50 * skill_lv + (sd ? sd->cart_weight : battle_config.max_cart_weight) / 10 / (150 - strbonus) + 50 * (sd ? pc->checkskill(sd, GN_REMODELING_CART) : 5);
 				}
 					break;
 				case GN_CARTCANNON:
@@ -5531,7 +5533,11 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			if( (i=pc->checkskill(sd,AB_EUCHARISTICA)) > 0 &&
 				(tstatus->race == RC_DEMON || tstatus->def_ele == ELE_DARK) )
 				ATK_ADDRATE(-i);
-			if (skill_id != PA_SACRIFICE && skill_id != MO_INVESTIGATE && skill_id != CR_GRANDCROSS && skill_id != NPC_GRANDDARKNESS && skill_id != PA_SHIELDCHAIN && !flag.cri) {
+			if (skill_id != PA_SACRIFICE && skill_id != MO_INVESTIGATE && skill_id != CR_GRANDCROSS && skill_id != NPC_GRANDDARKNESS && skill_id != PA_SHIELDCHAIN 
+#ifndef RENEWAL			
+			&& !flag.cri
+#endif
+			) {
 				//Elemental/Racial adjustments
 				if (sd->right_weapon.def_ratio_atk_ele & (1<<tstatus->def_ele)
 				 || sd->right_weapon.def_ratio_atk_race & map->race_id2mask(tstatus->race)
